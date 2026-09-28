@@ -55,7 +55,7 @@
 
   .tasks-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
   .tasks-head span { color: var(--muted); font-size: .85rem; }
-  form { display: flex; gap: 8px; margin-bottom: 12px; }
+  .add-row { display: flex; gap: 8px; margin-bottom: 12px; }
   input[type="text"] {
     flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border-radius: 10px;
     border: 1px solid var(--line); background: var(--bg); color: var(--text);
@@ -106,10 +106,10 @@
       <h1>Tasks</h1>
       <span id="stats"></span>
     </div>
-    <form id="addForm">
+    <div class="add-row" id="addForm">
       <input type="text" id="newTask" placeholder="What are you working on?" autocomplete="off" maxlength="120">
-      <button class="btn" type="submit">Add</button>
-    </form>
+      <button class="btn" type="button" id="addBtn">Add</button>
+    </div>
     <ul id="list"></ul>
   </section>
 
@@ -290,8 +290,8 @@
     $('stats').textContent = state.tasks.length ? `${doneCount}/${state.tasks.length} done · 🍅 ${pomos}` : '';
   }
 
-  $('addForm').addEventListener('submit', e => {
-    e.preventDefault();
+  // Not a <form>: sandboxed previews block form submission, so the submit event never fires.
+  function addTask() {
     const input = $('newTask');
     const title = input.value.trim();
     if (!title) return;
@@ -300,6 +300,11 @@
     if (!state.activeId) state.activeId = task.id;
     input.value = '';
     save(); renderTasks(); renderClock();
+  }
+  $('addBtn').addEventListener('click', addTask);
+  $('newTask').addEventListener('keydown', e => {
+    // Ignore Enter while an IME (e.g. Chinese pinyin) is still composing.
+    if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) { e.preventDefault(); addTask(); }
   });
 
   // ---- Settings ----
