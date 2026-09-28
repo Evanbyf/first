@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Focus Timer</title>
+<style>
+  :root {
+    --bg: #f6f4ef; --card: #ffffff; --text: #1f1d1a; --muted: #6f6a62;
+    --line: #e4e0d8; --accent: #d9534f; --accent-soft: #fbe9e8; --ok: #3a8f5c;
+  }
+  :root[data-mode="short"] { --accent: #2f8f83; --accent-soft: #e2f3f1; }
+  :root[data-mode="long"]  { --accent: #4a6fd1; --accent-soft: #e6ecfb; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #151413; --card: #1f1e1c; --text: #eeeae3; --muted: #9c968c;
+            --line: #33312d; --accent-soft: #3a2323; }
+    :root[data-mode="short"] { --accent-soft: #1d3431; }
+    :root[data-mode="long"]  { --accent-soft: #232c45; }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--bg); color: var(--text);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    display: flex; justify-content: center; padding: 32px 16px;
+    transition: background .3s;
+  }
+  main { width: 100%; max-width: 460px; display: grid; gap: 16px; align-content: start; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
+  h1 { font-size: 1.1rem; margin: 0 0 4px; letter-spacing: .02em; }
+
+  .modes { display: flex; gap: 6px; justify-content: center; }
+  .modes button {
+    border: 0; background: transparent; color: var(--muted); padding: 6px 12px;
+    border-radius: 999px; font: inherit; font-size: .9rem; cursor: pointer;
+  }
+  .modes button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+
+  .clock { text-align: center; }
+  .time {
+    font-size: clamp(4rem, 20vw, 6rem); font-weight: 700; font-variant-numeric: tabular-nums;
+    letter-spacing: -.02em; margin: 8px 0 0;
+  }
+  .progress { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin: 8px 0 16px; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .5s linear; }
+  .current { color: var(--muted); font-size: .95rem; min-height: 1.5em; margin-bottom: 16px; }
+  .current strong { color: var(--text); }
+
+  .controls { display: flex; gap: 8px; justify-content: center; }
+  .btn {
+    font: inherit; border-radius: 10px; padding: 10px 18px; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card); color: var(--text);
+  }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; min-width: 120px; }
+  .btn:focus-visible, input:focus-visible, .modes button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .tasks-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+  .tasks-head span { color: var(--muted); font-size: .85rem; }
+  form { display: flex; gap: 8px; margin-bottom: 12px; }
+  input[type="text"] {
+    flex: 1; min-width: 0; font: inherit; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg); color: var(--text);
+  }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  li {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid transparent; cursor: pointer;
+  }
+  li:hover { background: var(--bg); }
+  li.active { border-color: var(--accent); background: var(--accent-soft); }
+  li.done .title { text-decoration: line-through; color: var(--muted); }
+  li input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--ok); cursor: pointer; }
+  li .title { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  li .count { color: var(--muted); font-size: .85rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  li .del { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 1.1rem; padding: 0 4px; }
+  li .del:hover { color: var(--accent); }
+  .empty { color: var(--muted); text-align: center; font-size: .9rem; padding: 8px 0; }
+
+  details summary { cursor: pointer; color: var(--muted); font-size: .9rem; }
+  .settings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .settings label { font-size: .8rem; color: var(--muted); display: grid; gap: 4px; }
+  .settings input { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
+  .hint { color: var(--muted); font-size: .8rem; text-align: center; }
+  kbd { font: inherit; font-size: .75rem; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+</style>
+</head>
+<body>
+<main>
+  <section class="card clock">
+    <div class="modes" role="group" aria-label="Timer mode">
+      <button data-mode="focus">Focus</button>
+      <button data-mode="short">Short break</button>
+      <button data-mode="long">Long break</button>
+    </div>
+    <div class="time" id="time" aria-live="off">25:00</div>
+    <div class="progress"><div id="bar"></div></div>
+    <div class="current" id="current"></div>
+    <div class="controls">
+      <button class="btn primary" id="startBtn">Start</button>
+      <button class="btn" id="resetBtn" title="Reset">Reset</button>
+      <button class="btn" id="skipBtn" title="Skip to next">Skip</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="tasks-head">
+      <h1>Tasks</h1>
+      <span id="stats"></span>
+    </div>
+    <form id="addForm">
+      <input type="text" id="newTask" placeholder="What are you working on?" autocomplete="off" maxlength="120">
+      <button class="btn" type="submit">Add</button>
+    </form>
+    <ul id="list"></ul>
+  </section>
+
+  <section class="card">
+    <details>
+      <summary>Settings</summary>
+      <div class="settings">
+        <label>Focus (min)<input type="number" id="setFocus" min="1" max="120"></label>
+        <label>Short (min)<input type="number" id="setShort" min="1" max="60"></label>
+        <label>Long (min)<input type="number" id="setLong" min="1" max="60"></label>
+      </div>
+    </details>
+  </section>
+
+  <p class="hint"><kbd>Space</kbd> start/pause · <kbd>R</kbd> reset · <kbd>N</kbd> new task</p>
+</main>
+
+<script>
+(() => {
+  const STORE_KEY = 'focus-timer-v1';
+  const LONG_EVERY = 4;
+  const LABELS = { focus: 'Focus', short: 'Short break', long: 'Long break' };
+
+  // ---- State ----
+  let state = {
+    tasks: [],               // { id, title, done, pomos }
+    activeId: null,
+    durations: { focus: 25, short: 5, long: 15 },
+    focusStreak: 0,          // completed focus sessions since last long break
+  };
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY));
+    if (saved) state = { ...state, ...saved, durations: { ...state.durations, ...saved.durations } };
+  } catch {}
+  const save = () => { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch {} };
+
+  let mode = 'focus';
+  let remaining = state.durations.focus * 60 * 1000; // ms
+  let endAt = null;        // timestamp when running, null when paused
+  let tick = null;
+
+  const $ = id => document.getElementById(id);
+  const timeEl = $('time'), barEl = $('bar'), startBtn = $('startBtn');
+
+  // ---- Timer ----
+  const total = () => state.durations[mode] * 60 * 1000;
+  const fmt = ms => {
+    const s = Math.max(0, Math.ceil(ms / 1000));
+    return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  };
+
+  function renderClock() {
+    const left = endAt ? endAt - Date.now() : remaining;
+    timeEl.textContent = fmt(left);
+    barEl.style.width = `${Math.min(100, (1 - left / total()) * 100)}%`;
+    document.title = endAt ? `${fmt(left)} · ${LABELS[mode]}` : 'Focus Timer';
+    startBtn.textContent = endAt ? 'Pause' : (left < total() ? 'Resume' : 'Start');
+    document.documentElement.dataset.mode = mode;
+    document.querySelectorAll('.modes button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.mode === mode)));
+    const task = state.tasks.find(t => t.id === state.activeId);
+    $('current').innerHTML = mode === 'focus'
+      ? (task ? `Working on <strong></strong>` : 'Pick a task below (optional)')
+      : 'Take a breather ☕';
+    if (mode === 'focus' && task) $('current').querySelector('strong').textContent = task.title;
+  }
+
+  function start() {
+    if (endAt) return;
+    endAt = Date.now() + remaining;
+    tick = setInterval(() => { if (endAt - Date.now() <= 0) complete(); else renderClock(); }, 250);
+    renderClock();
+  }
+  function pause() {
+    if (!endAt) return;
+    remaining = Math.max(0, endAt - Date.now());
+    endAt = null; clearInterval(tick);
+    renderClock();
+  }
+  function setMode(m) {
+    pause();
+    mode = m; remaining = total();
+    renderClock();
+  }
+  function reset() { setMode(mode); }
+
+  function nextMode() {
+    if (mode !== 'focus') return 'focus';
+    return state.focusStreak >= LONG_EVERY ? 'long' : 'short';
+  }
+
+  function complete() {
+    const finished = mode;
+    endAt = null; clearInterval(tick);
+    if (finished === 'focus') {
+      state.focusStreak++;
+      const task = state.tasks.find(t => t.id === state.activeId);
+      if (task) task.pomos++;
+      renderTasks();
+    } else if (finished === 'long') {
+      state.focusStreak = 0;
+    }
+    save();
+    chime();
+    notify(finished === 'focus' ? 'Focus session done — take a break!' : 'Break over — back to it!');
+    setMode(nextMode());
+  }
+
+  function skip() {
+    pause();
+    if (mode === 'long') state.focusStreak = 0;
+    save();
+    setMode(nextMode());
+  }
+
+  // ---- Sound + notifications ----
+  let audioCtx;
+  function chime() {
+    try {
+      audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+      [0, 0.18, 0.36].forEach((t, i) => {
+        const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+        o.frequency.value = [660, 880, 1100][i];
+        o.connect(g); g.connect(audioCtx.destination);
+        const at = audioCtx.currentTime + t;
+        g.gain.setValueAtTime(0.0001, at);
+        g.gain.exponentialRampToValueAtTime(0.25, at + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
+        o.start(at); o.stop(at + 0.55);
+      });
+    } catch {}
+  }
+  function notify(msg) {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        new Notification('Focus Timer', { body: msg });
+      }
+    } catch {}
+  }
+
+  // ---- Tasks ----
+  function renderTasks() {
+    const list = $('list');
+    list.innerHTML = '';
+    if (!state.tasks.length) {
+      list.innerHTML = '<li class="empty" style="cursor:default">No tasks yet — add one above.</li>';
+    }
+    for (const t of state.tasks) {
+      const li = document.createElement('li');
+      li.className = (t.id === state.activeId ? 'active ' : '') + (t.done ? 'done' : '');
+      li.innerHTML = `<input type="checkbox" aria-label="Mark done"><span class="title"></span>
+        <span class="count"></span><button class="del" aria-label="Delete task">×</button>`;
+      li.querySelector('.title').textContent = t.title;
+      li.querySelector('.count').textContent = t.pomos ? '🍅 ' + t.pomos : '';
+      const cb = li.querySelector('input');
+      cb.checked = t.done;
+      cb.addEventListener('click', e => e.stopPropagation());
+      cb.addEventListener('change', () => {
+        t.done = cb.checked;
+        if (t.done && state.activeId === t.id) state.activeId = null;
+        save(); renderTasks(); renderClock();
+      });
+      li.querySelector('.del').addEventListener('click', e => {
+        e.stopPropagation();
+        state.tasks = state.tasks.filter(x => x.id !== t.id);
+        if (state.activeId === t.id) state.activeId = null;
+        save(); renderTasks(); renderClock();
+      });
+      li.addEventListener('click', () => {
+        if (t.done) return;
+        state.activeId = state.activeId === t.id ? null : t.id;
+        save(); renderTasks(); renderClock();
+      });
+      list.appendChild(li);
+    }
+    const doneCount = state.tasks.filter(t => t.done).length;
+    const pomos = state.tasks.reduce((n, t) => n + t.pomos, 0);
+    $('stats').textContent = state.tasks.length ? `${doneCount}/${state.tasks.length} done · 🍅 ${pomos}` : '';
+  }
+
+  $('addForm').addEventListener('submit', e => {
+    e.preventDefault();
+    const input = $('newTask');
+    const title = input.value.trim();
+    if (!title) return;
+    const task = { id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), title, done: false, pomos: 0 };
+    state.tasks.push(task);
+    if (!state.activeId) state.activeId = task.id;
+    input.value = '';
+    save(); renderTasks(); renderClock();
+  });
+
+  // ---- Settings ----
+  for (const [key, id] of [['focus', 'setFocus'], ['short', 'setShort'], ['long', 'setLong']]) {
+    const el = $(id);
+    el.value = state.durations[key];
+    el.addEventListener('change', () => {
+      const v = Math.round(Number(el.value));
+      if (!(v >= 1 && v <= Number(el.max))) { el.value = state.durations[key]; return; }
+      state.durations[key] = v;
+      save();
+      if (mode === key && !endAt) remaining = total();
+      renderClock();
+    });
+  }
+
+  // ---- Wiring ----
+  startBtn.addEventListener('click', () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      try { Notification.requestPermission(); } catch {}
+    }
+    endAt ? pause() : start();
+  });
+  $('resetBtn').addEventListener('click', reset);
+  $('skipBtn').addEventListener('click', skip);
+  document.querySelectorAll('.modes button').forEach(b =>
+    b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+  document.addEventListener('keydown', e => {
+    if (e.target.matches('input, textarea') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === 'Space') { e.preventDefault(); startBtn.click(); }
+    else if (e.key === 'r' || e.key === 'R') reset();
+    else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); $('newTask').focus(); }
+  });
+
+  renderTasks();
+  renderClock();
+})();
+</script>
+</body>
+</html>
