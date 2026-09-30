@@ -109,7 +109,7 @@
 | Frame 5394 | 320×532 | 0，间距 10 | 8 | bold/medium 16 · `#222329` | `{color-overlay-white}` | light/box-shadow-light |
 | 编组 32备份 27 | 510×680 | — | — | 14 · `#323233`（未绑定，混合字重） | — | — |
 
-页面里还用到：`{color-mask-080}`（遮罩）、`{color-primary-brand2}`、`{color-primary-brand5}`、`{color-border-border3}`、`{color-background-bg4}`⚠️、`{radius-border-radius-none}`⚠️。
+页面里还用到：`{color-mask-080}`（遮罩）、`{color-primary-brand2}`、`{color-primary-brand5}`、`{color-border-border3}`、`{remote-tiexin-color-background-bg4}`（远程集合「Tiexin」）、示例「创建频道」的文字 `{remote-tiexin-color-text-text1}` / `{remote-tiexin-color-text-text4}`（远程集合「Tiexin」）、`{radius-border-radius-none}`⚠️。
 
 **使用说明**：设计稿未说明。
 
@@ -190,7 +190,7 @@
 | 菜单容器 `_dropmenu` | 200×232 | 4/0/4/0 | 0 | — | — |
 | Frame 5090 / 5329 | 188×96 / 188×71 | 6/4/6/4，间距 4 | — | 14 · `#222329` / `{color-text-text1}` | `#ffffff`，描边 1px `#dde2e9`，圆角 8，阴影 `0 8px 12px #121317 10%`（均未绑定） |
 
-页面文字（非组件）：「重启实例」「用量统计」（Frame 5328 示例菜单项）。页面还用到了 `{color-background-bg-color-overlay}`⚠️、`{color-border-border5}`、`Condition/jingshi`⚠️。
+页面文字（非组件）：「重启实例」「用量统计」（Frame 5328 示例菜单项）。页面还用到了 `{color-background-bg-color-overlay}`⚠️、`{color-border-border5}`、`{remote-condition-jingshi}`（远程库变量 #f44837）。
 
 **使用说明**：设计稿未说明。
 
@@ -958,7 +958,7 @@ type=tag 的标签用了 `{color-primary-brand4-qipao}`、`{color-primary-brand5
 
 **尺寸与间距**：default / custom 214×242，icon 214×106；纵向间距 20；描述 regular/base 14 · `{color-text-text3}`。
 
-页面原文（画框「空状态」）：「暂无数据」「灵珠/魔丸等待你的召唤」。这一页还引用了**远程库**变量 `Neutral/text_fuzhu1`、`Neutral/text_neirong`（本文件里没有定义）和 `{color-background-bg5}`。
+页面原文（画框「空状态」）：「暂无数据」「灵珠/魔丸等待你的召唤」。这一页还引用了**远程库**变量 `{remote-neutral-text-fuzhu1}`（#75797e）、`{remote-neutral-text-neirong}`（#222329 / 暗 #d6d7dd）（本文件的「颜色」集合里没有定义，来自远程集合「同程管家组件库」）和 `{color-background-bg5}`。
 
 **使用说明**：设计稿未说明（除上面的示例文案外没有规则说明）。
 
@@ -1463,7 +1463,7 @@ light / plain 效果下各 type 的浅色底和描边用的是旧版 Element 色
 | warning | `{color-warning-color-warning-light-9}`⚠️ / `-light-8`⚠️ | `{color-success-warning}` |
 | error | `{color-error-color-error-light-9}`⚠️ / `-light-8`⚠️ | `{color-success-danger}` |
 
-Toast：160×94，内边距 20/0/18/0，间距 12，圆角 14（未绑定变量），填充绑定 `overlay/toast`，文字 regular/extra-small 12 · `text/on-primary`——这两个变量**不在**本文件的「颜色」集合里（来自另一个库），见 README。
+Toast：160×94，内边距 20/0/18/0，间距 12，圆角 14（未绑定变量），填充绑定 `{remote-overlay-toast}`（rgba(31,35,41,0.8784)），文字 regular/extra-small 12 · `{remote-text-on-primary}`（#ffffff）——这两个变量**不在**本文件的「颜色」集合里（来自远程集合「Color」），见 README。
 
 **使用说明**：设计稿未说明。
 
