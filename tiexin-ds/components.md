@@ -1487,3 +1487,100 @@ Toast：160×94，内边距 20/0/18/0，间距 12，圆角 14（未绑定变量�
 **使用说明**：设计稿未说明。
 
 ---
+## 47. Notification 通知提醒
+
+- 页面：通知提醒 · 节点：[371:13940](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=371-13940) · 5 个变体
+
+| 属性 | 类型 | 可选值 | 默认 |
+|---|---|---|---|
+| type | VARIANT | danger / info / primary / success / warning | info |
+| icon#371:2 | BOOLEAN | true / false | true |
+| close button#371:8 | BOOLEAN | true / false | true |
+
+**状态**：用 type 区分类型（只有图标颜色不同）。
+
+**尺寸与间距**：400×108，内边距 16/24/16/24，间距 12，圆角 8 `{radius-border-radius-base}`⚠️，填充 `{color-background-bg-color}`⚠️，阴影 light/box-shadow-light；标题 bold/medium 16 · `{color-text-text2}`。
+
+**使用说明**：设计稿未说明。
+
+---
+
+## 48. Popconfirm 气泡确认框
+
+- 页面：气泡确认框 · 节点：[306:36550](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=306-36550) · 12 个变体
+
+| 属性 | 类型 | 可选值 | 默认 |
+|---|---|---|---|
+| placement | VARIANT | top-start / top / top-end / right-start / right / right-end / bottom-start / bottom / bottom-end / left-start / left / left-end | left-start |
+| text | VARIANT | on（只有一个值） | on |
+
+**状态**：没有交互状态（用 12 个方位区分）。
+
+**尺寸与间距**：240×82（上下方位含箭头 240×88），阴影 light/box-shadow-light，正文 regular/base 14 · `{color-text-text3}`。
+
+**使用说明**：设计稿未说明。
+
+---
+
+## 49. Popover 气泡卡片
+
+- 页面：气泡卡片 · 节点：[304:34110](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=304-34110) · 12 个变体
+- 可替换内容（独立组件）：`text` 304:34692（200×80）、`table` 304:34690（300×240）、`avatar` 304:34689（260×202）
+
+| 属性 | 类型 | 可选值 | 默认 |
+|---|---|---|---|
+| placement | VARIANT | 12 个方位，同 Popconfirm | left-start |
+| Instance#568:46 | INSTANCE_SWAP | text / table / avatar | （实例） |
+
+**状态**：没有交互状态。
+
+**尺寸与间距**：200×104（上下方位 200×110），阴影 light/box-shadow-light；text 内容间距 12，regular/medium 16 · `{color-text-text2}`；avatar 内容内边距 8，间距 16。
+
+**使用说明**：设计稿未说明。
+
+---
+
+## 50. Tooltips 文字提示气泡框
+
+- 页面：文字提示气泡框 · 页面分区：`_parts`（这一页用的是 FRAME，不是 SECTION）、`Components`、`Copy me - light`、`Copy me - dark`
+- Tooltips：[147:2495](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=147-2495) · 72 个变体
+- 子部件：`_arrow_placement` 138:2078（36）、`_arrow_style` 138:1910（3）
+
+| 组件 | 属性 | 类型 | 可选值 | 默认 |
+|---|---|---|---|---|
+| Tooltips | effect | VARIANT | dark / light / custom | dark |
+| | placement | VARIANT | 12 个方位 | top-start |
+| | multiple | VARIANT | off / on | off |
+| _arrow_placement | placement / effect | VARIANT | 12 个方位 / dark·light·border | top-start / dark |
+| _arrow_style | effect | VARIANT | border / dark / light | dark |
+
+**状态**：没有交互状态。
+
+**尺寸与间距**：上下方位 129×38，左右方位 135×32，多行 160×58；阴影 light/box-shadow-light；文字 regular/extra-small 12，dark / custom 为 white，light 为 `{color-text-text2}`；箭头 12×6，横向容器 32×6（内边距 0/16），纵向容器 6×32（内边距 8/0）。
+
+**使用说明**：设计稿未说明。
+
+---
+
+## 51. Divider 分割线
+
+- 页面：分割线 · 节点：[522:32508](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=522-32508) · 5 个变体
+
+| 属性 | 类型 | 可选值 | 默认 |
+|---|---|---|---|
+| type | VARIANT | dashed / basic / custom | basic |
+| custom | VARIANT | default / text-left / text-right / icon | default |
+
+**状态**：没有交互状态。
+
+**尺寸与间距**：640×49，上下内边距 24（线本身 1px）。页面示例正文是 Lorem ipsum 占位文字。
+
+**使用说明**：设计稿未说明。
+
+---
+
+## 附：其它页面
+
+- 封面（0:1）：只有一个 1920×1080 的封面画框 [2902:799](https://www.figma.com/design/tl19wuHmHOyNK2C1r7DhQo/?node-id=2902-799)，没有组件。
+- 颜色、字体、阴影效果（0:3）：规范页，内容见 tokens.json。
+- 三个名字只有一个空格的页面（74:1545、74:1546、565:11312）：都是空页，只用来分组。
